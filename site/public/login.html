@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThermoFish | Login</title>
+
+    <!-- Aqui colocamos o link para o arquivo de estilização-->
+    <link rel="icon" href="Images/Icon.png">
+    <!-- <link rel="stylesheet" href="LoginEstilos.css"> -->
+    <link rel="stylesheet" href="css/Estilos1.css">
+    <script src="https://kit.fontawesome.com/f509651826.js" crossorigin="anonymous"></script>
+    <script src="./js/funcoes.js"></script>
+</head>
+
+<body>
+    
+    <div class="header">
+        <div class="container">
+            <span id="nome"> <img class="lghead" src="./css/Images/NOME.png"> </span>
+            <ul class="navbar">
+                <li id="#inicio"><a href="Index.html">Inicio</a></li>
+                <li><a href="Index.html#solucao">Solução</a></li>
+                <li><a href="Index.html#simulador">Simulador</a></li>
+                <li><a href="Index.html#Sobre">Sobre nós</a></li>
+                <div class="button">
+                    <li><a href="Login.html" id="lg-btn"><i class="fa-regular fa-user"></i>Entrar</a></li>
+                    <li><a href="Cadastro.html" id="cdt-btn">Cadastre-se</a></li>
+                </div>
+            </ul>
+        </div>
+    </div>
+    <!-- Começo do Banner -->
+
+    <div class="banner">
+        <div class="container">
+            <div class="caixa_formulario">
+                <div class="flogin">
+                    <h1>Bem Vindo Novamente!</h1>
+
+                    <input id="ipt_email" type="email" name="email" placeholder="Seu e-mail...">
+                    <input id="ipt_senha" type="password" name="senha" placeholder="Sua senha...">
+                    <input type="submit" name="login" value="Entrar" onclick="entrar()">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <footer class="main-footer">
+
+
+
+        <div class="footer-box">
+            <div class="company-footer">
+                <h4>Endereço:</h4>
+                <p>Rua Haddock lobo, 595 - Cerqueira Cesar.<br>
+                    São Paulo - SP</p>
+                <h4>Contatos:</h4>
+                <p>(11) 21436166<br>
+                    0800 072 6789 <br>
+                    WhatsApp: 99638-0772<br>
+                    thermofish@sac.com</p>
+            </div>
+        </div>
+
+        <div class="footer-box">
+            <div>
+
+                <img src="./css/Images/NOME.png" alt="" id="logo-footer">
+            </div>
+            <h4>ThermoFish referência em monitoramento. &copy; 2022</h4>
+        </div>
+
+        <div class="footer-box">
+            <nav class="btn_social">
+                <ul>
+                    <li><i class="icon icon-facebook"><img src="./css/Images/icons8-facebook-novo-50.png"
+                                alt="logo-facebook"></i></a></li>
+                    <li><img src="./css/Images/Instagram_Rounded_Solid_icon-icons.com_61560.png" alt="logo-instagram"><i
+                            class="icon icon-instagram"></i></a></li>
+                    <li><img src="./css/Images/icons8-whatsapp-50.png" alt="logo-whatsapp"><i
+                            class="icon icon-youtube"></i></a></li>
+                    <li><img src="./css/Images/Youtube_Rounded_Solid_icon-icons.com_61558.png" alt="logo-youtube"><i
+                            class="icon icon-whatsapp"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </footer>
+    <!--footer fim-->
+
+</body>
+
+</html>
+
+<script>
+
+
+    function entrar() {
+        // aguardar();
+
+        var emailVar = ipt_email.value;
+        var senhaVar = ipt_senha.value;
+
+        if (emailVar == "" || senhaVar == "") {
+            // cardErro.style.display = "block"
+            // mensagem_erro.innerHTML = "(Mensagem de erro para todos os campos em branco)";
+            finalizarAguardar();
+            return false;
+        }
+        // else {
+        //     setInterval(sumirMensagem, 5000)
+        // }
+
+        console.log("FORM LOGIN: ", emailVar);
+        console.log("FORM SENHA: ", senhaVar);
+
+        fetch("/usuarios/autenticar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                emailServer: emailVar,
+                senhaServer: senhaVar
+            })
+        }).then(function (resposta) {
+            console.log("ESTOU NO THEN DO entrar()!")
+
+            if (resposta.ok) {
+                console.log(resposta);
+
+                resposta.json().then(json => {
+                    console.log(json);
+                    console.log(JSON.stringify(json));
+
+                    sessionStorage.EMAIL_USUARIO = json.email;
+                    sessionStorage.NOME_USUARIO = json.nome;
+                    sessionStorage.ID_USUARIO = json.id;
+
+                    setTimeout(function () {
+                        window.location = "/Dash.html";
+                        
+                    }, 1000); // apenas para exibir o loading
+
+                });
+
+            } else {
+
+                console.log("Houve um erro ao tentar realizar o login!");
+
+                resposta.text().then(texto => {
+                    console.error(texto);
+                    finalizarAguardar(texto);
+                });
+            }
+
+        }).catch(function (erro) {
+            console.log(erro);
+        })
+
+        return false;
+    }
+
+    // function sumirMensagem() {
+    //     cardErro.style.display = "none"
+    // }
+
+</script>

@@ -7,6 +7,7 @@
 
 body{
     min-height: 100vh;
+    
 }
 
 a{
@@ -57,6 +58,7 @@ th,td{
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    box-shadow: 4px 4px 4px  0 rgba(0, 0, 0, 0.2);
     
 }
 
@@ -89,7 +91,7 @@ th,td{
     right: 0;
     width: 80vw;
     height: 226vh;
-    background: #efefef;
+    background: #5F818A;
 }
 
 .container .header{
@@ -98,12 +100,12 @@ th,td{
     right: 0;
     width: 80vw;
     height: 10vh;
-    background: rgb(255, 255, 255);
+    background: #cbdad5;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    box-shadow: 2px 2px 2px  0 rgba(0, 0, 0, 0.2);
+    /* border-radius: 10px; */
     
 }
 

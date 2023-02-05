@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DashBoard</title>
+  <link rel="stylesheet" href="Style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body onload="obterTodosOsgraficos()">
+  <div class="side-menu">
+    <div class="brand-nome">
+
+      <img src="imgs/Thermofish.png" width="400px" style="margin-top: 210px;">
+
+    </div>
+    <h1>Bem-Vindo ao Painel de Análise, Usuário!</h1><br><br>
+    <ul>
+      <a href="#DashBoardInicio">
+        <li><img src="imgs/dashboard.png" width="20px">&nbsp; DashBoard</li>
+      </a>
+      <a href="#4Graficos">
+        <li><img src="imgs/tanque.png" width="20px">&nbsp; Tanques</li>
+      </a>
+      <!-- <a href=""> <li><img src="imgs/gear.png" width="20px">&nbsp; Configurações</li></a> -->
+      <a href="">
+        <li><img src="imgs/help.png" width="20px">&nbsp; Ajuda</li>
+      </a>
+      <a href="">
+        <li><img src="imgs/logout.png" width="20px">&nbsp; Sair</li>
+      </a>
+    </ul>
+  </div>
+  <div class="container">
+    <div class="header">
+      <div class="nav">
+
+        <div class="user">
+
+          <!-- <a href=""><img src="imgs/user.png" style="margin-top: 5px; margin-left: 10px; margin-right: 5px;" ></a>  -->
+          <a href="#"><img src="imgs/bell.png" style="margin-top: 5px; margin-left: 50px;"></a>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <section id="DashBoardInicio">
+        <div class="cards">
+          <a href="">
+            <div class="card">
+              <div class="box">
+                <h4>4</h4>
+                <h3>Critico</h3>
+              </div>
+              <div class="icon-case">
+                <img src="imgs/delete-button.png" width="80px">
+              </div>
+            </div>
+          </a>
+
+          <a href="">
+
+            <div class="card">
+              <div class="box">
+                <h4>3</h4>
+                <h3>Alerta</h3>
+              </div>
+              <div class="icon-case">
+                <img src="imgs/aviso.png" width="90px">
+              </div>
+            </div>
+          </a>
+
+          <a href="">
+            <div class="card">
+              <div class="box">
+                <h4>41</h4>
+                <h3>Ideal</h3>
+              </div>
+              <div class="icon-case">
+                <img src="imgs/verifica.png" width="80px">
+              </div>
+            </div>
+          </a>
+
+        </div>
+        <div class="content-2">
+          <div class="graficos_chartjs"><canvas id="myChart"></canvas></div>
+          <div class="graficos_chartjs2"><canvas id="myChart2"></canvas></div>
+        </div>
+      </section>
+
+      <section id="4Graficos">
+        <div class="content-2">
+          <div class="graficos_chartjs3"><canvas id="myChart3"></canvas></div>
+          <div class="graficos_chartjs4"><canvas id="myChart4"></canvas></div>
+
+        </div>
+
+        <div class="content-2">
+          <div class="graficos_chartjs5"><canvas id="myChart5"></canvas></div>
+          <div class="graficos_chartjs6"><canvas id="myChart6"></canvas></div>
+
+        </div>
+      </section>
+
+    </div>
+</body>
+
+</html>
+<script>
+
+  var confirmou = true;
+  var tanque1 = 0;
+  var tanque2 = 0;
+  var tanque3 = 0;
+  var tanque4 = 0;
+  var atraso = 0;
+  var total = 100;
+
+
+  function obterTodosOsgraficos() {
+    window.onload = obterDadosGrafico(1)
+    window.onload = obterDadosGrafico(2)
+    window.onload = obterDadosGrafico(3)
+    window.onload = obterDadosGrafico(4)
+  }
+
+  let proximaAtualizacao;
+
+
+  /*Gráfico 1 do lado da pizza*/
+  const labelsbar = [
+    'Tanque-1',
+    'Tanque-2',
+    'Tanque-3',
+    'Tanque-4'
+
+  ];
+
+  const data = {
+    labels: labelsbar,
+    datasets: [{
+      label: 'Quantidade de vezes que as medições sairam fora do parâmetro ideal',
+      backgroundColor: 'rgb(47, 79, 79)',
+      borderColor: 'rgb(255, 255, 255)',
+      data: [0, 0, 0, 0],
+    }]
+  };
+
+  const config = {
+    type: 'bar',
+    data: data,
+    options: {
+      resposive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Medições'
+        }
+      },
+      scales: {
+        y: {
+          suggestedMin: 0,
+          suggestedMax: 48,
+        }
+      }
+    },
+  };
+
+  const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+  );
+
+  // inserindo dados 
+
+  function obterDadosGrafico(idAquario) {
+    // alterarTitulo(idAquario)
+    console.log('estou aqui')
+    console.log(idAquario);
+
+    // console.log(resposta);
+    if (proximaAtualizacao != undefined) {
+      clearTimeout(proximaAtualizacao);
+    }
+
+    fetch(`/medidas/ultimas/${idAquario}`, { cache: 'no-store' }).then(function (response) {
+      // console.log(idAquario);
+      if (response.ok) {
+        response.json().then(function (resposta) {
+          console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+          resposta.reverse();
+
+          plotarGrafico(resposta, 1);
+          plotarGrafico2(resposta, 2);
+          plotarGrafico3(resposta, 3);
+          plotarGrafico4(resposta, 4);
+        });
+      } else {
+        console.error('Nenhum dado encontrado ou erro na API');
+      }
+    })
+      .catch(function (error) {
+        console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+      });
+
+  }
+
+  // Esta função *plotarGrafico* usa os dados capturados na função anterior para criar o gráfico
+  // Configura o gráfico (cores, tipo, etc), materializa-o na página e, 
+  // A função *plotarGrafico* também invoca a função *atualizarGrafico*
+  function plotarGrafico(resposta, idAquario) {
+    console.log('iniciando plotagem do gráfico...');
+
+    /*Gráfico 3*/  /* Grafico 1 - Tempo Real */
+
+    let labels3 = [];
+
+    let data3 = {
+      labels: labels3,
+      datasets: [{
+        label: 'Temperatura Tanque-1',
+        backgroundColor: 'rgb(255, 255, 255)',
+        borderColor: 'rgb(47, 79, 79)',
+        data: [],
+        fill: false,
+        tension: 0.1,
+      }]
+    };
+
+
+    // Inserindo valores recebidos em estrutura para plotar o gráfico
+    for (i = 0; i < resposta.length; i++) {
+      var registro = resposta[i];
+      labels3.push(registro.momento_grafico);
+      data3.datasets[0].data.push(registro.temperatura);
+    }
+
+    const config3 = {
+      type: 'line',
+      data: data3,
+      options: {
+        resposive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Temperatura'
+          }
+        },
+        scales: {
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 40,
+          }
+        }
+      },
+    };
+
+    var myChart3 = new Chart(
+      document.getElementById('myChart3'),
+      config3
+    );
+
+    setTimeout(() => atualizarGrafico(idAquario, data3, myChart3), 5000);
+  }
+
+  // Fim do grafico 3 - tempo real
+
+
+  // inicio do grafico 4 - tempo real 
+
+  function plotarGrafico2(resposta, idAquario) {
+
+    console.log(idAquario);
+    /*Gráfico 4*/
+    var labels4 = [];
+
+    let data4 = {
+      labels: labels4,
+      datasets: [{
+        label: 'Temperatura Tanque-2',
+        backgroundColor: 'rgb(255, 255, 255)',
+        borderColor: 'rgb(47, 79, 79)',
+        data: [],
+        fill: false,
+        tension: 0.1
+      }]
+    };
+
+    for (i = 0; i < resposta.length; i++) {
+      var registro = resposta[i];
+      labels4.push(registro.momento_grafico);
+      data4.datasets[0].data.push(registro.temperatura);
+    }
+
+    const config4 = {
+      type: 'line',
+      data: data4,
+      options: {
+        resposive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Temperatura'
+          }
+        },
+        scales: {
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 40,
+          }
+        }
+      }
+    };
+
+    var myChart4 = new Chart(
+      document.getElementById('myChart4'),
+      config4
+    );
+
+    setTimeout(() => atualizarGrafico(idAquario, data4, myChart4), 5000);
+  }
+
+  // fim do grafico 4
+
+  // incio do grafico 5 - tempo real 
+
+  function plotarGrafico3(resposta, idAquario) {
+    /*Gráfico 5*/
+    let labels5 = [];
+
+    let data5 = {
+      labels: labels5,
+      datasets: [{
+        label: 'Temperatura Tanque-3',
+        backgroundColor: 'rgb(255, 255, 255)',
+        borderColor: 'rgb(47, 79, 79)',
+        data: [],
+        fill: false,
+        tension: 0.1
+      }]
+    };
+
+    for (i = 0; i < resposta.length; i++) {
+      var registro = resposta[i];
+      labels5.push(registro.momento_grafico);
+      data5.datasets[0].data.push(registro.temperatura);
+    }
+
+    const config5 = {
+      type: 'line',
+      data: data5,
+      options: {
+        resposive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Temperatura'
+          }
+        },
+        scales: {
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 40,
+          }
+        }
+      }
+    };
+
+    var myChart5 = new Chart(
+      document.getElementById('myChart5'),
+      config5
+    );
+    setTimeout(() => atualizarGrafico(idAquario, data5, myChart5), 5000);
+
+  }
+
+  // fim do grafico 5 
+
+  // incio do grafico 6 - tempo real 
+
+  function plotarGrafico4(resposta, idAquario) {
+    console.log(idAquario);
+    /*Gráfico 6*/
+    let labels6 = [];
+
+    let data6 = {
+      labels: labels6,
+      datasets: [{
+        label: 'Temperatura Tanque-4',
+        backgroundColor: 'rgb(255, 255, 255)',
+        borderColor: 'rgb(47, 79, 79)',
+        data: [],
+        fill: false,
+        tension: 0.1
+      }]
+    };
+
+    for (i = 0; i < resposta.length; i++) {
+      var registro = resposta[i];
+      labels6.push(registro.momento_grafico);
+      data6.datasets[0].data.push(registro.temperatura);
+    }
+
+    const config6 = {
+      type: 'line',
+      data: data6,
+      options: {
+        resposive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Temperatura'
+          }
+        },
+        scales: {
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 40,
+          }
+        }
+      }
+    };
+
+    var myChart6 = new Chart(
+      document.getElementById('myChart6'),
+      config6
+    );
+    setTimeout(() => atualizarGrafico(idAquario, data6, myChart6), 5000);
+  }
+
+  /*Gráfico de Pizza*/
+  const labels2 = [
+    'Risco de Atraso na Produção',
+
+  ];
+
+  const data2 = {
+    labels: labels2,
+    datasets: [{
+      label: 'Risco',
+      backgroundColor: ['rgb(47, 79, 79)', 'rgb(0, 128, 128)'],
+      borderColor: 'rgb(255, 255, 255)',
+      data: [0, 100],
+    }]
+  };
+
+  const config2 = {
+    type: 'pie',
+    data: data2,
+    options: {}
+  };
+
+  const myChart2 = new Chart(
+    document.getElementById('myChart2'),
+    config2
+  );
+
+  function atualizarGrafico(idAquario, data3, myChart3, data4, myChart4, data5, myChart5, data6, myChart6) {
+
+
+
+    fetch(`/medidas/tempo-real/${idAquario}`, { cache: 'no-store' }).then(function (response) {
+      if (response.ok) {
+        response.json().then(function (novoRegistro) {
+
+          console.log(`Dados recebidos: ${JSON.stringify(novoRegistro)}`);
+          console.log(`Dados atuais do gráfico:`);
+          console.log(data3);
+
+          // document.getElementById("avisoCaptura").innerHTML = "";
+
+          if (novoRegistro[0].momento_grafico == data3.labels[data3.labels.length - 1]) {
+            console.log("---------------------------------------------------------------")
+            console.log("Como não há dados novos para captura, o gráfico não atualizará.")
+            // document.getElementById("avisoCaptura").innerHTML = "<i class='fa-solid fa-triangle-exclamation'></i> Foi trazido o dado mais atual capturado pelo sensor. <br> Como não há dados novos a exibir, o gráfico não atualizará."
+            console.log("Horário do novo dado capturado:")
+            console.log(novoRegistro[0].momento_grafico)
+            console.log("Horário do último dado capturado:")
+            console.log(data3.labels[data3.labels.length - 1])
+            console.log("---------------------------------------------------------------")
+          } else {
+            // tirando e colocando valores no gráfico
+            data3.labels.shift(); // apagar o primeiro
+            data3.labels.push(novoRegistro[0].momento_grafico); // incluir um novo momento
+
+            data3.datasets[0].data.shift();  // apagar o primeiro de temperatura
+            data3.datasets[0].data.push(novoRegistro[0].temperatura); // incluir uma nova medida de temperatura
+
+            myChart3.update();
+
+
+          }
+
+
+          if (total < 3) {
+            if (novoRegistro[0].temperatura < 14.0) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado crítico ' + novoRegistro[0].temperatura)
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+              
+
+            }
+
+            if (novoRegistro[0].temperatura > 14.0 && novoRegistro[0].temperatura < 25.0) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado alerta '  + novoRegistro[0].temperatura)
+              
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+
+            }
+            if (novoRegistro[0].temperatura > 31.0 && novoRegistro[0].temperatura < 35.0) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado alerta '  + novoRegistro[0].temperatura)
+             
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+             
+            }
+            if (novoRegistro[0].temperatura > 35.0 ) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado crítico '  + novoRegistro[0].temperatura)
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+              
+            }
+
+
+            
+
+
+          } else if (total > 3) {
+
+            if (novoRegistro[0].temperatura < 10.0) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado crítico '  + novoRegistro[0].temperatura)
+              
+              
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+              atraso += 7
+              total -= 7
+              atualizarGraficoPizza(myChart2, data2)
+             
+            }
+
+            if (novoRegistro[0].temperatura < 14.0) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado crítico '  + novoRegistro[0].temperatura )
+              
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+              atraso += 7
+              total -= 7
+              atualizarGraficoPizza(myChart2, data2)
+              
+            }
+
+            if (novoRegistro[0].temperatura > 14.0 && novoRegistro[0].temperatura < 25.0) {
+              alert('Seu tanque ' + idAquario + ' está em estado alerta '  + novoRegistro[0].temperatura)
+
+
+               if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+              atraso += 7
+              total -= 7
+              atualizarGraficoPizza(myChart2, data2)
+            }
+            if (novoRegistro[0].temperatura > 31.0 && novoRegistro[0].temperatura < 35.0) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado alerta '  + novoRegistro[0].temperatura)
+              
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+              }
+              atraso += 7
+              total -= 7
+              atualizarGraficoPizza(myChart2, data2)
+              
+            }
+            if (novoRegistro[0].temperatura > 35.0 ) {
+              
+              alert('Seu tanque ' + idAquario + ' está em estado crítico '  + novoRegistro[0].temperatura)
+
+
+              if (idAquario == 1) {
+                tanque1++
+                atualizarGraficoBarra(myChart, data)
+              }
+
+              if (idAquario == 2) {
+                tanque2++
+                atualizarGraficoBarra(myChart, data)
+              }
+              else if (idAquario == 3) {
+                tanque3++
+                atualizarGraficoBarra(myChart, data)
+
+              }
+             else  if (idAquario == 4) {
+                tanque4++
+                atualizarGraficoBarra(myChart, data)
+
+              }
+              atraso += 7
+              total -= 7
+              atualizarGraficoPizza(myChart2, data2)
+             
+
+            }
+
+            console.log(tanque2, tanque3, tanque4);
+          }
+
+
+          // Altere aqui o valor em ms se quiser que o gráfico atualize mais rápido ou mais devagar
+          proximaAtualizacao = setTimeout(() => atualizarGrafico(idAquario, data3, myChart3, data4, myChart4, data5, myChart5, data6, myChart6), 5000);
+        });
+      } else {
+        console.error('Nenhum dado encontrado ou erro na API');
+        // Altere aqui o valor em ms se quiser que o gráfico atualize mais rápido ou mais devagar
+        proximaAtualizacao = setTimeout(() => atualizarGrafico(idAquario, data3, myChart3, data4, myChart4, data5, myChart5, data6, myChart6), 5000);
+      }
+    })
+      .catch(function (error) {
+        console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+      });
+
+  }
+
+  // TESTE GRAFICO BARRAS
+
+  function atualizarGraficoBarra(myChart, data) {
+
+    data.datasets[0].data[0] = tanque1
+    data.datasets[0].data[1] = tanque2
+    data.datasets[0].data[2] = tanque3
+    data.datasets[0].data[3] = tanque4
+
+    myChart.update();
+
+  }
+
+  function atualizarGraficoPizza(myChart2, data2) {
+
+    data2.datasets[0].data[0] = atraso
+    data2.datasets[0].data[1] = total
+
+    myChart2.update();
+
+  }
+
+
+
+</script>
